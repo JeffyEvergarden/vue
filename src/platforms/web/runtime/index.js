@@ -30,10 +30,10 @@ Vue.config.isUnknownElement = isUnknownElement
 extend(Vue.options.directives, platformDirectives)
 extend(Vue.options.components, platformComponents)
 
-// install platform patch function
+// install platform patch function  初始化和更新函数 diff算法 实现跨平台
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
-// public mount method
+// public mount method  ===> mountComponent
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean

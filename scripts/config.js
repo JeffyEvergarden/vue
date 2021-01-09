@@ -34,7 +34,7 @@ const resolve = p => {
     return path.resolve(__dirname, '../', p)
   }
 }
-
+// 创建目标的配置
 const builds = {
   // Runtime only (CommonJS). Used by bundlers e.g. Webpack & Browserify
   'web-runtime-cjs-dev': {
