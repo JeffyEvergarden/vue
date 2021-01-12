@@ -7,7 +7,11 @@
     <title>Document</title>
   </head>
   <body>
-    <div id="app">{{currentBranch}}</div>
+    <div id="app">
+      <p>{{currentBranch}}</p>
+
+      <p @click="change">{{currentBranch}}</p>
+    </div>
 
     <script>
       new Vue({
@@ -18,7 +22,11 @@
           commits: null,
         },
         created: function () {},
-        methods: {},
+        methods: {
+          change() {
+            this.currentBranch = 'branch'
+          },
+        },
       });
     </script>
   </body>
