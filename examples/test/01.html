@@ -9,22 +9,28 @@
   <body>
     <div id="app">
       <p>{{currentBranch}}</p>
-
+      <p>{{parents.children}}</p>
       <p @click="change">{{currentBranch}}</p>
     </div>
 
     <script>
+      Vue.component("comp", {
+        template: "<div>fuck</div>",
+      });
       new Vue({
         el: "#app",
 
         data: {
           currentBranch: "master",
           commits: null,
+          parents: {
+            children: "son",
+          },
         },
         created: function () {},
         methods: {
           change() {
-            this.currentBranch = 'branch'
+            this.currentBranch = "branch";
           },
         },
       });

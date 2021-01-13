@@ -2,6 +2,7 @@
 
 import { namespaceMap } from 'web/util/index'
 
+// 只创造了tag的dom节点和可能设置了multiple的值
 export function createElement (tagName: string, vnode: VNode): Element {
   const elm = document.createElement(tagName)
   if (tagName !== 'select') {
