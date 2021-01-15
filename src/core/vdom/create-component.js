@@ -40,10 +40,11 @@ const componentVNodeHooks = {
       !vnode.componentInstance._isDestroyed &&
       vnode.data.keepAlive
     ) {
-      // kept-alive components, treat as a patch
+      // kept-alive components, treat as a patch  keptalive的处理
       const mountedNode: any = vnode // work around flow
       componentVNodeHooks.prepatch(mountedNode, mountedNode)
     } else {
+      //
       const child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
         activeInstance
@@ -111,7 +112,7 @@ export function createComponent (
 
   const baseCtor = context.$options._base
 
-  // plain options object: turn it into a constructor
+  // plain options object: turn it into a constructor // 如果传的是配置
   if (isObject(Ctor)) {
     Ctor = baseCtor.extend(Ctor)
   }
@@ -125,7 +126,7 @@ export function createComponent (
     return
   }
 
-  // async component
+  // async component 异步组件会生成零时占位符
   let asyncFactory
   if (isUndef(Ctor.cid)) {
     asyncFactory = Ctor
@@ -148,27 +149,27 @@ export function createComponent (
 
   // resolve constructor options in case global mixins are applied after
   // component constructor creation
-  resolveConstructorOptions(Ctor)
+  resolveConstructorOptions(Ctor) // 将options合并
 
-  // transform component v-model data into props & events
+  // transform component v-model data into props & events // 处理v-model
   if (isDef(data.model)) {
     transformModel(Ctor.options, data)
   }
 
-  // extract props
+  // extract props 属性和特性分开
   const propsData = extractPropsFromVNodeData(data, Ctor, tag)
 
-  // functional component
+  // functional component 函数式组件怎么做
   if (isTrue(Ctor.options.functional)) {
     return createFunctionalComponent(Ctor, propsData, data, context, children)
   }
 
   // extract listeners, since these needs to be treated as
   // child component listeners instead of DOM listeners
-  const listeners = data.on
+  const listeners = data.on // 自定义事件
   // replace with listeners with .native modifier
   // so it gets processed during parent component patch.
-  data.on = data.nativeOn
+  data.on = data.nativeOn // 原生事件
 
   if (isTrue(Ctor.options.abstract)) {
     // abstract components do not keep anything
@@ -182,7 +183,7 @@ export function createComponent (
     }
   }
 
-  // install component management hooks onto the placeholder node
+  // install component management hooks onto the placeholder node // 安装自定义钩子
   installComponentHooks(data)
 
   // return a placeholder vnode
@@ -227,6 +228,7 @@ export function createComponentInstanceForVnode (
 
 function installComponentHooks (data: VNodeData) {
   const hooks = data.hook || (data.hook = {})
+  // 合并用户和默认管理的钩子
   for (let i = 0; i < hooksToMerge.length; i++) {
     const key = hooksToMerge[i]
     const existing = hooks[key]
