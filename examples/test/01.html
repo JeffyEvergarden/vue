@@ -7,12 +7,17 @@
     <title>Document</title>
   </head>
   <body>
-    <div id="app">{{currentBranch}}</div>
+    <div id="app">{{currentBranch}}<fuck /></div>
 
     <script>
+      Vue.component("fuck", {
+        template: "<div></div>",
+      });
       new Vue({
         el: "#app",
+        components: {
 
+        },
         data: {
           currentBranch: "master",
           commits: null,

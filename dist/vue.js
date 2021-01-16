@@ -1,5 +1,5 @@
 /*!
- * Vue.js v2.6.11
+ * Vue.js v2.6.12
  * (c) 2014-2021 Evan You
  * Released under the MIT License.
  */
@@ -1786,18 +1786,19 @@
       " Expected " + (expectedTypes.map(capitalize).join(', '));
     var expectedType = expectedTypes[0];
     var receivedType = toRawType(value);
-    var expectedValue = styleValue(value, expectedType);
-    var receivedValue = styleValue(value, receivedType);
     // check if we need to specify expected value
-    if (expectedTypes.length === 1 &&
-        isExplicable(expectedType) &&
-        !isBoolean(expectedType, receivedType)) {
-      message += " with value " + expectedValue;
+    if (
+      expectedTypes.length === 1 &&
+      isExplicable(expectedType) &&
+      isExplicable(typeof value) &&
+      !isBoolean(expectedType, receivedType)
+    ) {
+      message += " with value " + (styleValue(value, expectedType));
     }
     message += ", got " + receivedType + " ";
     // check if we need to specify received value
     if (isExplicable(receivedType)) {
-      message += "with value " + receivedValue + ".";
+      message += "with value " + (styleValue(value, receivedType)) + ".";
     }
     return message
   }
@@ -1812,9 +1813,9 @@
     }
   }
 
+  var EXPLICABLE_TYPES = ['string', 'number', 'boolean'];
   function isExplicable (value) {
-    var explicitTypes = ['string', 'number', 'boolean'];
-    return explicitTypes.some(function (elem) { return value.toLowerCase() === elem; })
+    return EXPLICABLE_TYPES.some(function (elem) { return value.toLowerCase() === elem; })
   }
 
   function isBoolean () {
@@ -3267,8 +3268,10 @@
   }
 
   function createComponentInstanceForVnode (
-    vnode, // we know it's MountedComponentVNode but flow doesn't
-    parent // activeInstance in lifecycle state
+    // we know it's MountedComponentVNode but flow doesn't
+    vnode,
+    // activeInstance in lifecycle state
+    parent
   ) {
     var options = {
       _isComponent: true,
@@ -4988,7 +4991,7 @@
       }
       // expose real self
       vm._self = vm;
-      initLifecycle(vm);
+      initLifecycle(vm); // 实例属性
       initEvents(vm);
       initRender(vm);
       callHook(vm, 'beforeCreate');
@@ -5075,7 +5078,7 @@
     this._init(options);
   }
 
-  initMixin(Vue);
+  initMixin(Vue); //_init()
   stateMixin(Vue);
   eventsMixin(Vue);
   lifecycleMixin(Vue);
@@ -5422,6 +5425,7 @@
     initAssetRegisters(Vue);
   }
 
+  // 初始化全局api
   initGlobalAPI(Vue);
 
   Object.defineProperty(Vue.prototype, '$isServer', {
@@ -5440,7 +5444,7 @@
     value: FunctionalRenderContext
   });
 
-  Vue.version = '2.6.11';
+  Vue.version = '2.6.12';
 
   /*  */
 
@@ -5477,7 +5481,7 @@
     'default,defaultchecked,defaultmuted,defaultselected,defer,disabled,' +
     'enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,' +
     'muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,' +
-    'required,reversed,scoped,seamless,selected,sortable,translate,' +
+    'required,reversed,scoped,seamless,selected,sortable,' +
     'truespeed,typemustmatch,visible'
   );
 
@@ -6705,7 +6709,7 @@
       cur = attrs[key];
       old = oldAttrs[key];
       if (old !== cur) {
-        setAttr(elm, key, cur);
+        setAttr(elm, key, cur, vnode.data.pre);
       }
     }
     // #4391: in IE9, setting type can reset value for input[type=radio]
@@ -6725,8 +6729,8 @@
     }
   }
 
-  function setAttr (el, key, value) {
-    if (el.tagName.indexOf('-') > -1) {
+  function setAttr (el, key, value, isInPre) {
+    if (isInPre || el.tagName.indexOf('-') > -1) {
       baseSetAttr(el, key, value);
     } else if (isBooleanAttr(key)) {
       // set attribute for blank value
@@ -7649,7 +7653,7 @@
         // skip the update if old and new VDOM state is the same.
         // `value` is handled separately because the DOM value may be temporarily
         // out of sync with VDOM state due to focus, composition and modifiers.
-        // This  #4521 by skipping the unnecesarry `checked` update.
+        // This  #4521 by skipping the unnecessary `checked` update.
         cur !== oldProps[key]
       ) {
         // some property updates can throw
@@ -9033,10 +9037,10 @@
   extend(Vue.options.directives, platformDirectives);
   extend(Vue.options.components, platformComponents);
 
-  // install platform patch function
+  // install platform patch function  初始化和更新函数 diff算法 实现跨平台
   Vue.prototype.__patch__ = inBrowser ? patch : noop;
 
-  // public mount method
+  // public mount method  ===> mountComponent
   Vue.prototype.$mount = function (
     el,
     hydrating
@@ -9249,7 +9253,7 @@
 
   // Regular Expressions for parsing tags and attributes
   var attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
-  var dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
+  var dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+?\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
   var ncname = "[a-zA-Z_][\\-\\.0-9_a-zA-Z" + (unicodeRegExp.source) + "]*";
   var qnameCapture = "((?:" + ncname + "\\:)?" + ncname + ")";
   var startTagOpen = new RegExp(("^<" + qnameCapture));
@@ -9897,7 +9901,7 @@
         }
       },
       comment: function comment (text, start, end) {
-        // adding anyting as a sibling to the root node is forbidden
+        // adding anything as a sibling to the root node is forbidden
         // comments should still be allowed, but ignored
         if (currentParent) {
           var child = {
@@ -10855,9 +10859,9 @@
         code += genModifierCode;
       }
       var handlerCode = isMethodPath
-        ? ("return " + (handler.value) + "($event)")
+        ? ("return " + (handler.value) + ".apply(null, arguments)")
         : isFunctionExpression
-          ? ("return (" + (handler.value) + ")($event)")
+          ? ("return (" + (handler.value) + ").apply(null, arguments)")
           : isFunctionInvocation
             ? ("return " + (handler.value))
             : handler.value;

@@ -19,7 +19,7 @@ const activatedChildren: Array<Component> = []
 let has: { [key: number]: ?true } = {}
 let circular: { [key: number]: number } = {}
 let waiting = false
-let flushing = false
+let flushing = false // 冲洗
 let index = 0
 
 /**
