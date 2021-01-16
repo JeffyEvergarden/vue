@@ -7,23 +7,33 @@
     <title>Document</title>
   </head>
   <body>
-    <div id="app">{{currentBranch}}<fuck /></div>
+    <div id="app">
+      <p>{{currentBranch}}</p>
+      <p>{{parents.children}}</p>
+      <p @click="change">{{currentBranch}}</p>
+      <comp fake="20" />
+    </div>
 
     <script>
-      Vue.component("fuck", {
-        template: "<div></div>",
+      Vue.component("comp", {
+        template: "<div>fuck</div>",
       });
       new Vue({
         el: "#app",
-        components: {
 
-        },
         data: {
           currentBranch: "master",
           commits: null,
+          parents: {
+            children: "son",
+          },
         },
         created: function () {},
-        methods: {},
+        methods: {
+          change() {
+            this.currentBranch = "branch";
+          },
+        },
       });
     </script>
   </body>

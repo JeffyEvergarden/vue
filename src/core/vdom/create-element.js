@@ -44,6 +44,7 @@ export function createElement (
   return _createElement(context, tag, data, children, normalizationType)
 }
 
+// 生成vnode
 export function _createElement (
   context: Component,
   tag?: string | Class<Component> | Function | Object,
@@ -92,10 +93,13 @@ export function _createElement (
   } else if (normalizationType === SIMPLE_NORMALIZE) {
     children = simpleNormalizeChildren(children)
   }
+  // 以上都是标准化处理
+
   let vnode, ns
   if (typeof tag === 'string') {
     let Ctor
-    ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
+    ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag) // 命名空间
+    // 常规标签
     if (config.isReservedTag(tag)) {
       // platform built-in elements
       if (process.env.NODE_ENV !== 'production' && isDef(data) && isDef(data.nativeOn)) {
@@ -104,11 +108,15 @@ export function _createElement (
           context
         )
       }
+      // 直接生成vnode
       vnode = new VNode(
         config.parsePlatformTagName(tag), data, children,
         undefined, undefined, context
       )
+      // resolveAsset
     } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
+      // 获取构造函数
+      // 创建组件
       // component
       vnode = createComponent(Ctor, data, context, children, tag)
     } else {
@@ -121,6 +129,7 @@ export function _createElement (
       )
     }
   } else {
+    // 或者用户直接传递组件的配置对象或者构造函数
     // direct component options / constructor
     vnode = createComponent(tag, data, context, children)
   }

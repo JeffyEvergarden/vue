@@ -57,15 +57,16 @@ export function initLifecycle (vm: Component) {
 
 export function lifecycleMixin (Vue: Class<Component>) {
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
+    // render执行后会得到当前新的vnode
     const vm: Component = this
-    const prevEl = vm.$el
-    const prevVnode = vm._vnode
+    const prevEl = vm.$el // 拿到之前的dom树
+    const prevVnode = vm._vnode // 旧的vnode
     const restoreActiveInstance = setActiveInstance(vm)
-    vm._vnode = vnode
+    vm._vnode = vnode //赋值保存新的vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
     if (!prevVnode) {
-      // initial render
+      // initial render // 初始化要有多余参数
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
     } else {
       // updates
@@ -187,7 +188,9 @@ export function mountComponent (
     }
   } else {
     updateComponent = () => {
-      vm._update(vm._render(), hydrating)
+      const renderInfo = vm._render()
+      console.log(renderInfo)
+      vm._update(renderInfo, hydrating)
     }
   }
 

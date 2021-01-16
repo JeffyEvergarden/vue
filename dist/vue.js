@@ -3357,6 +3357,7 @@
     return _createElement(context, tag, data, children, normalizationType)
   }
 
+  // 生成vnode
   function _createElement (
     context,
     tag,
@@ -3405,6 +3406,8 @@
     } else if (normalizationType === SIMPLE_NORMALIZE) {
       children = simpleNormalizeChildren(children);
     }
+    // 以上都是标准化处理
+
     var vnode, ns;
     if (typeof tag === 'string') {
       var Ctor;
@@ -3434,6 +3437,7 @@
         );
       }
     } else {
+      // 或者用户直接传递组件的配置对象或者构造函数
       // direct component options / constructor
       vnode = createComponent(tag, data, context, children);
     }
@@ -3931,15 +3935,16 @@
 
   function lifecycleMixin (Vue) {
     Vue.prototype._update = function (vnode, hydrating) {
+      // render执行后会得到当前新的vnode
       var vm = this;
-      var prevEl = vm.$el;
-      var prevVnode = vm._vnode;
+      var prevEl = vm.$el; // 拿到之前的dom树
+      var prevVnode = vm._vnode; // 旧的vnode
       var restoreActiveInstance = setActiveInstance(vm);
-      vm._vnode = vnode;
+      vm._vnode = vnode; //赋值保存新的vnode
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
       if (!prevVnode) {
-        // initial render
+        // initial render // 初始化要有多余参数
         vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */);
       } else {
         // updates
@@ -4061,7 +4066,9 @@
       };
     } else {
       updateComponent = function () {
-        vm._update(vm._render(), hydrating);
+        var renderInfo = vm._render();
+        console.log(renderInfo);
+        vm._update(renderInfo, hydrating);
       };
     }
 
@@ -5677,6 +5684,7 @@
 
   /*  */
 
+  // 只创造了tag的dom节点和可能设置了multiple的值
   function createElement$1 (tagName, vnode) {
     var elm = document.createElement(tagName);
     if (tagName !== 'select') {
@@ -6182,19 +6190,19 @@
       }
 
       while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
-        if (isUndef(oldStartVnode)) {
+        if (isUndef(oldStartVnode)) { // 旧的开始节点= null 或者undefined
           oldStartVnode = oldCh[++oldStartIdx]; // Vnode has been moved left
-        } else if (isUndef(oldEndVnode)) {
+        } else if (isUndef(oldEndVnode)) { // 旧的结束节点 = null 或者undefined
           oldEndVnode = oldCh[--oldEndIdx];
-        } else if (sameVnode(oldStartVnode, newStartVnode)) {
+        } else if (sameVnode(oldStartVnode, newStartVnode)) { // 可能是相同的开始节点
           patchVnode(oldStartVnode, newStartVnode, insertedVnodeQueue, newCh, newStartIdx);
           oldStartVnode = oldCh[++oldStartIdx];
           newStartVnode = newCh[++newStartIdx];
-        } else if (sameVnode(oldEndVnode, newEndVnode)) {
+        } else if (sameVnode(oldEndVnode, newEndVnode)) { // 可能是相同的结束节点
           patchVnode(oldEndVnode, newEndVnode, insertedVnodeQueue, newCh, newEndIdx);
           oldEndVnode = oldCh[--oldEndIdx];
           newEndVnode = newCh[--newEndIdx];
-        } else if (sameVnode(oldStartVnode, newEndVnode)) { // Vnode moved right
+        } else if (sameVnode(oldStartVnode, newEndVnode)) { // Vnode moved right // 旧开和新结相同 换位
           patchVnode(oldStartVnode, newEndVnode, insertedVnodeQueue, newCh, newEndIdx);
           canMove && nodeOps.insertBefore(parentElm, oldStartVnode.elm, nodeOps.nextSibling(oldEndVnode.elm));
           oldStartVnode = oldCh[++oldStartIdx];
@@ -6209,13 +6217,13 @@
           idxInOld = isDef(newStartVnode.key)
             ? oldKeyToIdx[newStartVnode.key]
             : findIdxInOld(newStartVnode, oldCh, oldStartIdx, oldEndIdx);
-          if (isUndef(idxInOld)) { // New element
+          if (isUndef(idxInOld)) { // New element // 找不到就插
             createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm, false, newCh, newStartIdx);
           } else {
             vnodeToMove = oldCh[idxInOld];
             if (sameVnode(vnodeToMove, newStartVnode)) {
               patchVnode(vnodeToMove, newStartVnode, insertedVnodeQueue, newCh, newStartIdx);
-              oldCh[idxInOld] = undefined;
+              oldCh[idxInOld] = undefined; // 将旧的置为undefined
               canMove && nodeOps.insertBefore(parentElm, vnodeToMove.elm, oldStartVnode.elm);
             } else {
               // same key but different element. treat as new element
@@ -6266,10 +6274,12 @@
       index,
       removeOnly
     ) {
+      // 想到返回
       if (oldVnode === vnode) {
         return
       }
 
+      // 不知道是干嘛的 -------------------------------------
       if (isDef(vnode.elm) && isDef(ownerArray)) {
         // clone reused vnode
         vnode = ownerArray[index] = cloneVNode(vnode);
@@ -6277,6 +6287,7 @@
 
       var elm = vnode.elm = oldVnode.elm;
 
+      //isAsyncPlaceholder 、.asyncFactory.resolved、 ？？？
       if (isTrue(oldVnode.isAsyncPlaceholder)) {
         if (isDef(vnode.asyncFactory.resolved)) {
           hydrate(oldVnode.elm, vnode, insertedVnodeQueue);
@@ -6290,6 +6301,7 @@
       // note we only do this if the vnode is cloned -
       // if the new node is not cloned it means the render functions have been
       // reset by the hot-reload-api and we need to do a proper re-render.
+      // 静态标记了 key值相等  vnode.isCloned 表示是复制的，可以直接赋值
       if (isTrue(vnode.isStatic) &&
         isTrue(oldVnode.isStatic) &&
         vnode.key === oldVnode.key &&
@@ -6302,30 +6314,33 @@
       var i;
       var data = vnode.data;
       if (isDef(data) && isDef(i = data.hook) && isDef(i = i.prepatch)) {
-        i(oldVnode, vnode);
+        i(oldVnode, vnode); // prepatch 也不知道是干嘛
       }
 
       var oldCh = oldVnode.children;
       var ch = vnode.children;
+      // 属性更新
       if (isDef(data) && isPatchable(vnode)) {
         for (i = 0; i < cbs.update.length; ++i) { cbs.update[i](oldVnode, vnode); }
         if (isDef(i = data.hook) && isDef(i = i.update)) { i(oldVnode, vnode); }
       }
-      if (isUndef(vnode.text)) {
-        if (isDef(oldCh) && isDef(ch)) {
+
+      // 节点
+      if (isUndef(vnode.text)) { // 非文本节点
+        if (isDef(oldCh) && isDef(ch)) { // 都有children，执行updateChildren
           if (oldCh !== ch) { updateChildren(elm, oldCh, ch, insertedVnodeQueue, removeOnly); }
-        } else if (isDef(ch)) {
+        } else if (isDef(ch)) { // 旧vnode没有子节点
           {
             checkDuplicateKeys(ch);
           }
           if (isDef(oldVnode.text)) { nodeOps.setTextContent(elm, ''); }
-          addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue);
+          addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue); // 插入新的
         } else if (isDef(oldCh)) {
-          removeVnodes(oldCh, 0, oldCh.length - 1);
-        } else if (isDef(oldVnode.text)) {
+          removeVnodes(oldCh, 0, oldCh.length - 1); // 移除旧的
+        } else if (isDef(oldVnode.text)) { // 旧的有文本，新的没
           nodeOps.setTextContent(elm, '');
         }
-      } else if (oldVnode.text !== vnode.text) {
+      } else if (oldVnode.text !== vnode.text) { // 都是文本节点
         nodeOps.setTextContent(elm, vnode.text);
       }
       if (isDef(data)) {
@@ -6468,16 +6483,17 @@
       var isInitialPatch = false;
       var insertedVnodeQueue = [];
 
-      if (isUndef(oldVnode)) {
+      if (isUndef(oldVnode)) { //oldVnode不存在 = null或者undefined
         // empty mount (likely as component), create new root element
         isInitialPatch = true;
         createElm(vnode, insertedVnodeQueue);
       } else {
-        var isRealElement = isDef(oldVnode.nodeType);
+        var isRealElement = isDef(oldVnode.nodeType); // 是真实节点不为null或者undefined
         if (!isRealElement && sameVnode(oldVnode, vnode)) {
-          // patch existing root node
+          // patch existing root node // 都存在vnode
           patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly);
         } else {
+          // 这里之下都是处理初始化的
           if (isRealElement) {
             // mounting to a real element
             // check if this is server-rendered content and if we can perform
@@ -6500,24 +6516,25 @@
                 );
               }
             }
+            // ------------------------ 这两步不知道干嘛的
             // either not server-rendered, or hydration failed.
             // create an empty node and replace it
-            oldVnode = emptyNodeAt(oldVnode);
+            oldVnode = emptyNodeAt(oldVnode); // dom树转vnnode节点 细节先蔽先
           }
 
           // replacing existing element
-          var oldElm = oldVnode.elm;
-          var parentElm = nodeOps.parentNode(oldElm);
+          var oldElm = oldVnode.elm; // 获得dom树
+          var parentElm = nodeOps.parentNode(oldElm); // 获得dom节点
 
-          // create new node
+          // create new node 创建新vnode
           createElm(
             vnode,
             insertedVnodeQueue,
             // extremely rare edge case: do not insert if old element is in a
-            // leaving transition. Only happens when combining transition +
+            // leaving transition. Only happens when combining transition + _leaveCb 目前估计是
             // keep-alive + HOCs. (#4590)
-            oldElm._leaveCb ? null : parentElm,
-            nodeOps.nextSibling(oldElm)
+            oldElm._leaveCb ? null : parentElm, // 父节点
+            nodeOps.nextSibling(oldElm) //追加的地方
           );
 
           // update parent placeholder node element, recursively
@@ -6550,7 +6567,7 @@
             }
           }
 
-          // destroy old node
+          // destroy old node  删除旧节点
           if (isDef(parentElm)) {
             removeVnodes([oldVnode], 0, 0);
           } else if (isDef(oldVnode.tag)) {
