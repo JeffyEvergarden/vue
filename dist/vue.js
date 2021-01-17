@@ -3103,24 +3103,29 @@
 
   // inline hooks to be invoked on component VNodes during patch
   var componentVNodeHooks = {
+    // 初始化
     init: function init (vnode, hydrating) {
+      // keptalive的处理
       if (
-        vnode.componentInstance &&
-        !vnode.componentInstance._isDestroyed &&
-        vnode.data.keepAlive
+        vnode.componentInstance && // 有组件实例
+        !vnode.componentInstance._isDestroyed && // 没有销毁
+        vnode.data.keepAlive // keepalive
       ) {
-        // kept-alive components, treat as a patch
+        // kept-alive components, treat as a patch  keptalive的处理
         var mountedNode = vnode; // work around flow
         componentVNodeHooks.prepatch(mountedNode, mountedNode);
       } else {
+        // 组件实例化
+        // 以下操作new 实体 // 做响应式数据等处理
         var child = vnode.componentInstance = createComponentInstanceForVnode(
           vnode,
           activeInstance
         );
+        // 挂载
         child.$mount(hydrating ? vnode.elm : undefined, hydrating);
       }
     },
-
+    // 更新前钩子
     prepatch: function prepatch (oldVnode, vnode) {
       var options = vnode.componentOptions;
       var child = vnode.componentInstance = oldVnode.componentInstance;
@@ -3181,7 +3186,7 @@
 
     var baseCtor = context.$options._base;
 
-    // plain options object: turn it into a constructor
+    // plain options object: turn it into a constructor // 如果传的是配置
     if (isObject(Ctor)) {
       Ctor = baseCtor.extend(Ctor);
     }
@@ -3195,7 +3200,7 @@
       return
     }
 
-    // async component
+    // async component 异步组件会生成临时占位符，返回占位符
     var asyncFactory;
     if (isUndef(Ctor.cid)) {
       asyncFactory = Ctor;
@@ -3218,27 +3223,27 @@
 
     // resolve constructor options in case global mixins are applied after
     // component constructor creation
-    resolveConstructorOptions(Ctor);
+    resolveConstructorOptions(Ctor); // 将options合并
 
-    // transform component v-model data into props & events
+    // transform component v-model data into props & events // 处理v-model
     if (isDef(data.model)) {
       transformModel(Ctor.options, data);
     }
 
-    // extract props
+    // extract props 属性和特性分开
     var propsData = extractPropsFromVNodeData(data, Ctor, tag);
 
-    // functional component
+    // functional component 函数式组件怎么做
     if (isTrue(Ctor.options.functional)) {
       return createFunctionalComponent(Ctor, propsData, data, context, children)
     }
 
     // extract listeners, since these needs to be treated as
     // child component listeners instead of DOM listeners
-    var listeners = data.on;
+    var listeners = data.on; // 自定义事件
     // replace with listeners with .native modifier
     // so it gets processed during parent component patch.
-    data.on = data.nativeOn;
+    data.on = data.nativeOn; // 原生事件
 
     if (isTrue(Ctor.options.abstract)) {
       // abstract components do not keep anything
@@ -3252,7 +3257,7 @@
       }
     }
 
-    // install component management hooks onto the placeholder node
+    // install component management hooks onto the placeholder node // 安装自定义钩子
     installComponentHooks(data);
 
     // return a placeholder vnode
@@ -3289,6 +3294,7 @@
 
   function installComponentHooks (data) {
     var hooks = data.hook || (data.hook = {});
+    // 合并用户和默认管理的钩子
     for (var i = 0; i < hooksToMerge.length; i++) {
       var key = hooksToMerge[i];
       var existing = hooks[key];
@@ -3411,7 +3417,8 @@
     var vnode, ns;
     if (typeof tag === 'string') {
       var Ctor;
-      ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag);
+      ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag); // 命名空间
+      // 常规标签
       if (config.isReservedTag(tag)) {
         // platform built-in elements
         if ( isDef(data) && isDef(data.nativeOn)) {
@@ -3420,11 +3427,15 @@
             context
           );
         }
+        // 直接生成vnode
         vnode = new VNode(
           config.parsePlatformTagName(tag), data, children,
           undefined, undefined, context
         );
+        // resolveAsset
       } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
+        // 获取构造函数
+        // 创建组件
         // component
         vnode = createComponent(Ctor, data, context, children, tag);
       } else {
@@ -3944,7 +3955,7 @@
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
       if (!prevVnode) {
-        // initial render // 初始化要有多余参数
+        // initial render // 初始化要有多余参数 patch 返回的是真dom元素
         vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */);
       } else {
         // updates
@@ -4239,7 +4250,7 @@
   var has = {};
   var circular = {};
   var waiting = false;
-  var flushing = false;
+  var flushing = false; // 冲洗
   var index = 0;
 
   /**
@@ -4986,6 +4997,7 @@
         // internal component options needs special treatment.
         initInternalComponent(vm, options);
       } else {
+        // 合并挂载到静态的Vue.options
         vm.$options = mergeOptions(
           resolveConstructorOptions(vm.constructor),
           options || {},
@@ -5815,7 +5827,7 @@
 
   var emptyNode = new VNode('', {}, []);
 
-  var hooks = ['create', 'activate', 'update', 'remove', 'destroy'];
+  var hooks = ['create', 'activate', 'update', 'remove', 'destroy']; // 首先知道组件额外的钩子有这些
 
   function sameVnode (a, b) {
     return (
@@ -5859,8 +5871,9 @@
     var modules = backend.modules;
     var nodeOps = backend.nodeOps;
 
+    // hooks = ['create', 'activate', 'update', 'remove', 'destroy']
     for (i = 0; i < hooks.length; ++i) {
-      cbs[hooks[i]] = [];
+      cbs[hooks[i]] = []; // 初始化数组
       for (j = 0; j < modules.length; ++j) {
         if (isDef(modules[j][hooks[i]])) {
           cbs[hooks[i]].push(modules[j][hooks[i]]);
@@ -5927,10 +5940,11 @@
       }
 
       vnode.isRootInsert = !nested; // for transition enter check
+      // 如果是自定义组件就不往下走了
       if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
         return
       }
-
+      // 剩下是普通标签
       var data = vnode.data;
       var children = vnode.children;
       var tag = vnode.tag;
@@ -5948,7 +5962,7 @@
             );
           }
         }
-
+        // 创建真实元素
         vnode.elm = vnode.ns
           ? nodeOps.createElementNS(vnode.ns, tag)
           : nodeOps.createElement(tag, vnode);
@@ -5976,19 +5990,20 @@
     }
 
     function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
-      var i = vnode.data;
+      var i = vnode.data; // 自定义组件
       if (isDef(i)) {
         var isReactivated = isDef(vnode.componentInstance) && i.keepAlive;
-        if (isDef(i = i.hook) && isDef(i = i.init)) {
-          i(vnode, false /* hydrating */);
+        if (isDef(i = i.hook) && isDef(i = i.init)) { // 存在hook 存在init函数
+          i(vnode, false /* hydrating */); // 执行init
         }
         // after calling the init hook, if the vnode is a child component
         // it should've created a child instance and mounted it. the child
         // component also has set the placeholder vnode's elm.
         // in that case we can just return the element and be done.
         if (isDef(vnode.componentInstance)) {
+          // 前面已经获得了组件实例了
           initComponent(vnode, insertedVnodeQueue);
-          insert(parentElm, vnode.elm, refElm);
+          insert(parentElm, vnode.elm, refElm); // 追加父元素上
           if (isTrue(isReactivated)) {
             reactivateComponent(vnode, insertedVnodeQueue, parentElm, refElm);
           }
@@ -6003,9 +6018,10 @@
         vnode.data.pendingInsert = null;
       }
       vnode.elm = vnode.componentInstance.$el;
-      if (isPatchable(vnode)) {
+      if (isPatchable(vnode)) { // 该vnode上有vue实例
+        // 组件属性操作
         invokeCreateHooks(vnode, insertedVnodeQueue);
-        setScope(vnode);
+        setScope(vnode); // 样式
       } else {
         // empty component root.
         // skip all element-related modules except for ref (#3455)
@@ -6080,9 +6096,10 @@
       }
     }
 
-    // set scope id attribute for scoped CSS.
-    // this is implemented as a special case to avoid the overhead
-    // of going through the normal attribute patching process.
+    // set scope id attribute for scoped CSS. //为作用域CSS设置作用域id属性。
+    // this is implemented as a special case to avoid the overhead //这是作为一个特例实现的，以避免开销
+    // of going through the normal attribute patching process. //经历正常的属性修补过程。
+
     function setScope (vnode) {
       var i;
       if (isDef(i = vnode.fnScopeId)) {
@@ -6481,7 +6498,7 @@
       }
 
       var isInitialPatch = false;
-      var insertedVnodeQueue = [];
+      var insertedVnodeQueue = []; // 每次进行patch 都有这个
 
       if (isUndef(oldVnode)) { //oldVnode不存在 = null或者undefined
         // empty mount (likely as component), create new root element
@@ -11969,6 +11986,7 @@
         }
       }
     }
+    console.log(options.render);
     return mount.call(this, el, hydrating)
   };
 

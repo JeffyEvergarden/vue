@@ -34,25 +34,29 @@ import {
 
 // inline hooks to be invoked on component VNodes during patch
 const componentVNodeHooks = {
+  // 初始化
   init (vnode: VNodeWithData, hydrating: boolean): ?boolean {
+    // keptalive的处理
     if (
-      vnode.componentInstance &&
-      !vnode.componentInstance._isDestroyed &&
-      vnode.data.keepAlive
+      vnode.componentInstance && // 有组件实例
+      !vnode.componentInstance._isDestroyed && // 没有销毁
+      vnode.data.keepAlive // keepalive
     ) {
       // kept-alive components, treat as a patch  keptalive的处理
       const mountedNode: any = vnode // work around flow
       componentVNodeHooks.prepatch(mountedNode, mountedNode)
     } else {
-      //
+      // 组件实例化
+      // 以下操作new 实体 // 做响应式数据等处理
       const child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
         activeInstance
       )
+      // 挂载
       child.$mount(hydrating ? vnode.elm : undefined, hydrating)
     }
   },
-
+  // 更新前钩子
   prepatch (oldVnode: MountedComponentVNode, vnode: MountedComponentVNode) {
     const options = vnode.componentOptions
     const child = vnode.componentInstance = oldVnode.componentInstance
@@ -126,7 +130,7 @@ export function createComponent (
     return
   }
 
-  // async component 异步组件会生成零时占位符
+  // async component 异步组件会生成临时占位符，返回占位符
   let asyncFactory
   if (isUndef(Ctor.cid)) {
     asyncFactory = Ctor
