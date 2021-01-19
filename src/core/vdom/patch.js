@@ -233,13 +233,13 @@ export function createPatchFunction (backend) {
   }
 
   function initComponent (vnode, insertedVnodeQueue) {
-    if (isDef(vnode.data.pendingInsert)) {
-      insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert)
+    if (isDef(vnode.data.pendingInsert)) { // 如果当前是异步
+      insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert) // 一次追加多个值， apply第二个参数传数组
       vnode.data.pendingInsert = null
     }
     vnode.elm = vnode.componentInstance.$el
     if (isPatchable(vnode)) { // 该vnode上有vue实例
-      // 组件属性操作
+      // 组件属性事件等操作
       invokeCreateHooks(vnode, insertedVnodeQueue)
       setScope(vnode) // 样式
     } else {
@@ -307,12 +307,12 @@ export function createPatchFunction (backend) {
 
   function invokeCreateHooks (vnode, insertedVnodeQueue) {
     for (let i = 0; i < cbs.create.length; ++i) {
-      cbs.create[i](emptyNode, vnode)
+      cbs.create[i](emptyNode, vnode) // 遍历执行
     }
     i = vnode.data.hook // Reuse variable
     if (isDef(i)) {
-      if (isDef(i.create)) i.create(emptyNode, vnode)
-      if (isDef(i.insert)) insertedVnodeQueue.push(vnode)
+      if (isDef(i.create)) i.create(emptyNode, vnode) // 给真dom加入属性和事件
+      if (isDef(i.insert)) insertedVnodeQueue.push(vnode) // 如果是组件，插入到insertedVnodeQueue，这样数组就是子的在前，本身在后
     }
   }
 
@@ -585,11 +585,12 @@ export function createPatchFunction (backend) {
     }
   }
 
-  function invokeInsertHook (vnode, queue, initial) {
+  function invokeInsertHook (vnode, queue, initial) { // initial代表需不需要放到父亲 执行 mouted队列
     // delay insert hooks for component root nodes, invoke them after the
-    // element is really inserted
+    // element is really inserted 执行它们在真正插入的时候
     if (isTrue(initial) && isDef(vnode.parent)) {
-      vnode.parent.data.pendingInsert = queue
+      // 子组件 将周期放到mouted放到父函数  组建件 new实体的时候是beforecreate、created、beforemouted 执行完了
+      vnode.parent.data.pendingInsert = queue //
     } else {
       for (let i = 0; i < queue.length; ++i) {
         queue[i].data.hook.insert(queue[i])
@@ -709,6 +710,21 @@ export function createPatchFunction (backend) {
     }
   }
 
+    /**
+   * 执行`patch`函数，是为组件的渲染 VNode 创建 DOM Tree，最后插入到文档内。在此过程中，会新增 DOM 节点、修补（patch）DOM 节点、删除 DOM 节点。
+
+   * - 组件创建时，会首次调用`patch`，会根据渲染 VNode 创建 DOM Tree，DOM Tree 里所有 DOM 元素/子组件实例都是新创建的，且 DOM Tree 是递归生成的。
+   * - 组件改变时，每次都会调用`patch`，会根据改变前后的渲染 VNode 修补 DOM Tree，该过程可能会新增 DOM 节点、修补（patch）DOM 节点、删除 DOM 节点。
+   * - 组件销毁时，最后一次调用`patch`，会销毁 DOM Tree。
+   *
+   * @param {*} oldVnode 组件旧的渲染 VNode
+   * @param {*} vnode 组件新的渲染 VNode（执行 vm._render 后返回的）
+   * @param {*} hydrating 是否混合（服务端渲染时为 true，非服务端渲染情况下为 false）
+   * @param {*} removeOnly 这个参数是给 transition-group 用的
+   *
+   * 需要额外注意的是，这里的传入的 vnode 肯定是某组件的渲染 VNode；而对于连续嵌套组件的情况来说，渲染 VNode 同时也是直接子组件的占位 VNode
+   */
+
   return function patch (oldVnode, vnode, hydrating, removeOnly) {
     if (isUndef(vnode)) {
       if (isDef(oldVnode)) invokeDestroyHook(oldVnode)
@@ -721,7 +737,7 @@ export function createPatchFunction (backend) {
     if (isUndef(oldVnode)) { //oldVnode不存在 = null或者undefined
       // empty mount (likely as component), create new root element
       isInitialPatch = true
-      createElm(vnode, insertedVnodeQueue)
+      createElm(vnode, insertedVnodeQueue) // 子组件会走这一步
     } else {
       const isRealElement = isDef(oldVnode.nodeType) // 是真实节点不为null或者undefined
       if (!isRealElement && sameVnode(oldVnode, vnode)) {
@@ -754,7 +770,7 @@ export function createPatchFunction (backend) {
           // ------------------------ 这两步不知道干嘛的
           // either not server-rendered, or hydration failed.
           // create an empty node and replace it
-          oldVnode = emptyNodeAt(oldVnode) // dom树转vnnode节点 细节先蔽先
+          oldVnode = emptyNodeAt(oldVnode) // 根据根节点创建vnode 没有子节点的。
         }
 
         // replacing existing element
@@ -811,7 +827,7 @@ export function createPatchFunction (backend) {
       }
     }
 
-    invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch)
+    invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch) // 执行生命周期
     return vnode.elm
   }
 }

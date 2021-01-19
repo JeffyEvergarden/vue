@@ -230,6 +230,7 @@ export function createComponentInstanceForVnode (
   return new vnode.componentOptions.Ctor(options)
 }
 
+// 合并钩子，先执行原前，后执行自定义
 function installComponentHooks (data: VNodeData) {
   const hooks = data.hook || (data.hook = {})
   // 合并用户和默认管理的钩子

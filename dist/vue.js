@@ -6014,7 +6014,7 @@
 
     function initComponent (vnode, insertedVnodeQueue) {
       if (isDef(vnode.data.pendingInsert)) {
-        insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert);
+        insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert); // 一次追加多个值， apply第二个参数传数组
         vnode.data.pendingInsert = null;
       }
       vnode.elm = vnode.componentInstance.$el;
@@ -6087,7 +6087,7 @@
 
     function invokeCreateHooks (vnode, insertedVnodeQueue) {
       for (var i$1 = 0; i$1 < cbs.create.length; ++i$1) {
-        cbs.create[i$1](emptyNode, vnode);
+        cbs.create[i$1](emptyNode, vnode); // 遍历执行
       }
       i = vnode.data.hook; // Reuse variable
       if (isDef(i)) {
@@ -6491,6 +6491,21 @@
       }
     }
 
+      /**
+     * 执行`patch`函数，是为组件的渲染 VNode 创建 DOM Tree，最后插入到文档内。在此过程中，会新增 DOM 节点、修补（patch）DOM 节点、删除 DOM 节点。
+
+     * - 组件创建时，会首次调用`patch`，会根据渲染 VNode 创建 DOM Tree，DOM Tree 里所有 DOM 元素/子组件实例都是新创建的，且 DOM Tree 是递归生成的。
+     * - 组件改变时，每次都会调用`patch`，会根据改变前后的渲染 VNode 修补 DOM Tree，该过程可能会新增 DOM 节点、修补（patch）DOM 节点、删除 DOM 节点。
+     * - 组件销毁时，最后一次调用`patch`，会销毁 DOM Tree。
+     *
+     * @param {*} oldVnode 组件旧的渲染 VNode
+     * @param {*} vnode 组件新的渲染 VNode（执行 vm._render 后返回的）
+     * @param {*} hydrating 是否混合（服务端渲染时为 true，非服务端渲染情况下为 false）
+     * @param {*} removeOnly 这个参数是给 transition-group 用的
+     *
+     * 需要额外注意的是，这里的传入的 vnode 肯定是某组件的渲染 VNode；而对于连续嵌套组件的情况来说，渲染 VNode 同时也是直接子组件的占位 VNode
+     */
+
     return function patch (oldVnode, vnode, hydrating, removeOnly) {
       if (isUndef(vnode)) {
         if (isDef(oldVnode)) { invokeDestroyHook(oldVnode); }
@@ -6536,7 +6551,7 @@
             // ------------------------ 这两步不知道干嘛的
             // either not server-rendered, or hydration failed.
             // create an empty node and replace it
-            oldVnode = emptyNodeAt(oldVnode); // dom树转vnnode节点 细节先蔽先
+            oldVnode = emptyNodeAt(oldVnode); // 根据根节点创建vnode 没有子节点的。
           }
 
           // replacing existing element
