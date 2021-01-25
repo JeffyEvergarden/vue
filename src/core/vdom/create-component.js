@@ -188,6 +188,7 @@ export function createComponent (
 
   // return a placeholder vnode
   const name = Ctor.options.name || tag
+  // //  tag?: string,data?: VNodeData,children?: ?Array<VNode>,text?: string, elm?: Node,context?: Component,componentOptions?: VNodeComponentOptions,asyncFactory?: Function
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
     data, undefined, undefined, undefined, context,

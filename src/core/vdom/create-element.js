@@ -60,10 +60,11 @@ export function _createElement (
     )
     return createEmptyVNode()
   }
-  // object syntax in v-bind
+  // object syntax in v-bind  // 处理is属性
   if (isDef(data) && isDef(data.is)) {
     tag = data.is
   }
+  //tag不存在
   if (!tag) {
     // in case of component :is set to falsy value
     return createEmptyVNode()

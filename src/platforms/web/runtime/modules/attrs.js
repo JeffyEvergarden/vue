@@ -19,7 +19,7 @@ import {
 } from 'web/util/index'
 
 function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
-  const opts = vnode.componentOptions
+  const opts = vnode.componentOptions // 组件配置
   if (isDef(opts) && opts.Ctor.options.inheritAttrs === false) {
     return
   }
@@ -31,7 +31,7 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const oldAttrs = oldVnode.data.attrs || {}
   let attrs: any = vnode.data.attrs || {}
   // clone observed objects, as the user probably wants to mutate it
-  if (isDef(attrs.__ob__)) {
+  if (isDef(attrs.__ob__)) { // 作了响应式浅拷贝对象
     attrs = vnode.data.attrs = extend({}, attrs)
   }
 

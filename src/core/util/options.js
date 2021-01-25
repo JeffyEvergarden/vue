@@ -117,7 +117,7 @@ export function mergeDataOrFn (
     }
   }
 }
-
+// data合并策略
 strats.data = function (
   parentVal: any,
   childVal: any,

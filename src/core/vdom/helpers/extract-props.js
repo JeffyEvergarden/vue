@@ -17,15 +17,15 @@ export function extractPropsFromVNodeData (
   // we are only extracting raw values here.
   // validation and default values are handled in the child
   // component itself.
-  const propOptions = Ctor.options.props
-  if (isUndef(propOptions)) {
+  const propOptions = Ctor.options.props // 取出配置
+  if (isUndef(propOptions)) { // 未定义配置返回
     return
   }
   const res = {}
-  const { attrs, props } = data
+  const { attrs, props } = data // 取出render解析出来的attrs、props
   if (isDef(attrs) || isDef(props)) {
     for (const key in propOptions) {
-      const altKey = hyphenate(key)
+      const altKey = hyphenate(key) // 解析值key 比如onClick => on-click
       if (process.env.NODE_ENV !== 'production') {
         const keyInLowerCase = key.toLowerCase()
         if (
@@ -57,16 +57,16 @@ function checkProp (
   preserve: boolean
 ): boolean {
   if (isDef(hash)) {
-    if (hasOwn(hash, key)) {
-      res[key] = hash[key]
-      if (!preserve) {
+    if (hasOwn(hash, key)) { // 先找key值
+      res[key] = hash[key] // 赋值
+      if (!preserve) { // 是否删除旧的， 走props 不会删除
         delete hash[key]
       }
       return true
-    } else if (hasOwn(hash, altKey)) {
+    } else if (hasOwn(hash, altKey)) { // 有翻译的key值
       res[key] = hash[altKey]
       if (!preserve) {
-        delete hash[altKey]
+        delete hash[altKey] //
       }
       return true
     }

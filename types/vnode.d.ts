@@ -38,23 +38,23 @@ export interface VNodeComponentOptions {
   tag?: string;
 }
 
-export interface VNodeData {
+export interface VNodeData { // vnode.data
   key?: string | number;
-  slot?: string;
+  slot?: string; // 插槽
   scopedSlots?: { [key: string]: ScopedSlot | undefined };
   ref?: string;
   refInFor?: boolean;
   tag?: string;
-  staticClass?: string;
-  class?: any;
-  staticStyle?: { [key: string]: any };
-  style?: string | object[] | object;
+  staticClass?: string; // 静态的值
+  class?: any; // 动态class属性 绑定的值
+  staticStyle?: { [key: string]: any }; // 静态的style
+  style?: string | object[] | object; // 绑的style
   props?: { [key: string]: any };
-  attrs?: { [key: string]: any };
+  attrs?: { [key: string]: any }; // 属性
   domProps?: { [key: string]: any };
   hook?: { [key: string]: Function };
-  on?: { [key: string]: Function | Function[] };
-  nativeOn?: { [key: string]: Function | Function[] };
+  on?: { [key: string]: Function | Function[] }; //自定义事件
+  nativeOn?: { [key: string]: Function | Function[] }; // 原生事件
   transition?: object;
   show?: boolean;
   inlineTemplate?: {

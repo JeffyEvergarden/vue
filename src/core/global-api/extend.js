@@ -20,7 +20,7 @@ export function initExtend (Vue: GlobalAPI) {
     extendOptions = extendOptions || {}
     const Super = this
     const SuperId = Super.cid
-    const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {})
+    const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {}) // 如果传入已存在构造函数
     if (cachedCtors[SuperId]) {
       return cachedCtors[SuperId]
     }
