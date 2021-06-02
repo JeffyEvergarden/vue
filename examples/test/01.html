@@ -30,9 +30,14 @@
           },
         },
         created: function () {},
+        computed: {
+          fake() {
+            return this.currentBranch + "hui";
+          },
+        },
         methods: {
           change() {
-            this.currentBranch = "branch";
+            this.currentBranch = "branch" + Math.random();
           },
         },
       });
